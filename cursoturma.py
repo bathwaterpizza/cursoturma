@@ -1,4 +1,4 @@
-import os, json, subprocess, atexit
+import os, json, atexit
 from .. import turma, curso
 
 # Exportando funções de acesso
@@ -57,7 +57,7 @@ def add_assunto(id_turma: int, id_curso: int) -> tuple[int, None]:
     """
     Associa uma turma a um curso, que seria o assunto da turma, utilizando seus IDs
 
-    Checa se a turma e o curso existem em seus respectivos módulos
+    Verifica se a turma e o curso existem em seus respectivos módulos
     """
     for assunto in _assuntos:
         if assunto["id_turma"] == id_turma:
@@ -94,6 +94,9 @@ def del_assunto(id_turma: int) -> tuple[int, None]:
     return 6, None
 
 def get_curso_by_turma(id_turma: int) -> tuple[int, int]:
+    """
+    Retorna o ID do curso associado a turma
+    """
     for assunto in _assuntos:
         if assunto["id_turma"] == id_turma:
             return 0, assunto["id_curso"]
@@ -102,8 +105,20 @@ def get_curso_by_turma(id_turma: int) -> tuple[int, int]:
     return 6, None # type: ignore
 
 def get_turmas_by_curso(id_curso: int) -> tuple[int, list[int]]:
-    # retorna as turmas sobre tal curso
-    raise NotImplementedError
+    """
+    Retorna uma lista de IDs de turmas associadas a um curso
+    """
+    turmas_do_curso = []
+    
+    for assunto in _assuntos:
+        if assunto["id_curso"] == id_curso:
+            turmas_do_curso.append(assunto["id_turma"])
+    
+    if not turmas_do_curso:
+        # Curso não tem nenhuma turma associada
+        return 7, None # type: ignore
+    
+    return 0, turmas_do_curso
 
 # Setup
 # Popula lista
