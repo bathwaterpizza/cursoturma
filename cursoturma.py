@@ -1,4 +1,5 @@
 import os, json, subprocess, atexit
+from .. import turma, curso
 
 # Exportando funções de acesso
 __all__ = ["add_assunto", "del_assunto", "get_curso_by_turma", "get_turmas_by_curso"]
@@ -20,9 +21,9 @@ _assuntos: list[dict] = []
 # Funções internas
 def _read_assuntos() -> None:
     """
-    Lê o arquivo _JSON_FILE_PATH e carrega a lista _assuntos com seu conteúdo.
+    Lê o arquivo _JSON_FILE_PATH e carrega a lista _assuntos com seu conteúdo
 
-    Se não existir, chama _write_assuntos parar criar um novo vazio.
+    Se não existir, chama _write_assuntos parar criar um novo vazio
     """
     global _assuntos
 
@@ -38,7 +39,7 @@ def _read_assuntos() -> None:
 
 def _write_assuntos() -> None:
     """
-    Faz o dump da lista _assuntos no arquivo _JSON_FILE_PATH.
+    Faz o dump da lista _assuntos no arquivo _JSON_FILE_PATH
 
     Cria os arquivos necessários caso não existam, gerando uma lista vazia de assuntos
     """
@@ -53,17 +54,52 @@ def _write_assuntos() -> None:
 
 # Funções de acesso
 def add_assunto(id_turma: int, id_curso: int) -> tuple[int, None]:
-    # erro se ja existir
-    # pcisa usar global pra acessar _assuntos
-    raise NotImplementedError
+    """
+    Associa uma turma a um curso, que seria o assunto da turma, utilizando seus IDs
 
-def del_assunto(id_turma: int, id_curso: int) -> tuple[int, None]:
-    # erro se nao existir
-    raise NotImplementedError
+    Checa se a turma e o curso existem em seus respectivos módulos
+    """
+    for assunto in _assuntos:
+        if assunto["id_turma"] == id_turma:
+            # Turma ja está associada a um curso
+            return 4, None
+    
+    err, _ = turma.get_turma(id_turma)
+    if err == 1:
+        # Turma não existe
+        return 1, None
+    
+    err, _ = curso.get_curso(id_curso)
+    if err == 5:
+        # Curso não existe
+        return 5, None
+    
+    # Adiciona assunto
+    _assuntos.append({"id_turma": id_turma, "id_curso": id_curso})
+
+    return 0, None
+
+def del_assunto(id_turma: int) -> tuple[int, None]:
+    """
+    Desassocia uma turma de um curso, removendo o par turma-curso da lista de assuntos
+
+    Como toda turma identifica unicamente um par turma-curso, basta passar o id da turma
+    """
+    for assunto in _assuntos:
+        if assunto["id_turma"] == id_turma:
+            _assuntos.remove(assunto)
+            return 0, None
+    
+    # Turma não está associada a um curso
+    return 6, None
 
 def get_curso_by_turma(id_turma: int) -> tuple[int, int]:
-    # retorna o curso relacionado a turma
-    raise NotImplementedError
+    for assunto in _assuntos:
+        if assunto["id_turma"] == id_turma:
+            return 0, assunto["id_curso"]
+    
+    # Turma não está associada a um curso
+    return 6, None # type: ignore
 
 def get_turmas_by_curso(id_curso: int) -> tuple[int, list[int]]:
     # retorna as turmas sobre tal curso
