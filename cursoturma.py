@@ -1,5 +1,9 @@
-import os, json, atexit
-from .. import turma, curso
+import os, json, atexit, sys
+
+if 'unittest' in sys.modules:
+    import mock_turma as turma, mock_curso as curso
+else:
+    from .. import turma, curso
 
 # Exportando funções de acesso
 __all__ = ["add_assunto", "del_assunto", "get_curso_by_turma", "get_turmas_by_curso"]
